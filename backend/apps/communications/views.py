@@ -9,9 +9,6 @@ from rest_framework.decorators import permission_classes
 
 @permission_classes([permissions.IsAuthenticated])
 class EmailView(APIView):
-    """
-    Send and retrieve emails
-    """
 
     def post(self, request):
         serializer = EmailMessageSerializer(data=request.data)
@@ -37,7 +34,6 @@ class EmailView(APIView):
         )
 
     def get(self, request):
-        """Get all email communications"""
         communications = Communication.objects.filter(
             channel=Communication.EMAIL
         ).order_by("-created_at")[:10]

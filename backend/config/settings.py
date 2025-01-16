@@ -7,7 +7,6 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Celery Settings
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ["json"]
@@ -15,13 +14,12 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 
-# Additional Celery Settings for Windows
-if os.name == "nt":  # Windows specific settings
+if os.name == "nt":
     CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
     CELERY_TASK_TRACK_STARTED = True
-    CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
-    CELERY_WORKER_CONCURRENCY = 1  # Reduce concurrency on Windows
-    CELERY_WORKER_MAX_TASKS_PER_CHILD = 1  # Prevent memory leaks
+    CELERY_TASK_TIME_LIMIT = 30 * 60
+    CELERY_WORKER_CONCURRENCY = 1
+    CELERY_WORKER_MAX_TASKS_PER_CHILD = 1
 
 
 SECRET_KEY = os.getenv(
@@ -37,13 +35,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Third party
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "social_django",
-    # Local
     "apps.authentication",
     "apps.communications",
 ]
@@ -84,7 +80,6 @@ DATABASES = {
     }
 }
 
-# Email
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
@@ -92,26 +87,22 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-# Auth
 AUTHENTICATION_BACKENDS = (
     "social_core.backends.facebook.FacebookOAuth2",
     "apps.authentication.backends.EmailBackend",
     "django.contrib.auth.backends.ModelBackend",
 )
 
-# Facebook configuration
 SOCIAL_AUTH_FACEBOOK_KEY = os.getenv("FACEBOOK_APP_ID")
 SOCIAL_AUTH_FACEBOOK_SECRET = os.getenv("FACEBOOK_APP_SECRET")
 SOCIAL_AUTH_FACEBOOK_SCOPE = ["email"]
 SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {"fields": "id,name,email"}
 
-# WhatsApp API Configuration
 WHATSAPP_API_URL = os.getenv("WHATSAPP_API_URL")
 WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
 WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN")
 WHATSAPP_TEST_NUMBER = os.getenv("WHATSAPP_TEST_NUMBER")
 
-# IP API Configuration
 IP_API_URL = "https://ipapi.co/{}/json/"
 
 REST_FRAMEWORK = {
@@ -130,7 +121,6 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-# CORS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True  # This will allow all origins during testing
 # CORS_ALLOWED_ORIGINS = [
@@ -138,7 +128,6 @@ CORS_ALLOW_ALL_ORIGINS = True  # This will allow all origins during testing
 #     "http://127.0.0.1:3000",
 # ]
 
-# Paths
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "media/"
@@ -146,10 +135,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Custom User Model
 AUTH_USER_MODEL = "authentication.User"
 
-# Logging Configuration
+import os
+from logging.handlers import RotatingFileHandler
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -169,9 +159,11 @@ LOGGING = {
             "formatter": "simple",
         },
         "file": {
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(BASE_DIR, "django.log"),
             "formatter": "verbose",
+            "maxBytes": 52428800,
+            "backupCount": 1,
         },
     },
     "loggers": {

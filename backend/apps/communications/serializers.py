@@ -3,9 +3,6 @@ from .models import Communication
 
 
 class CommunicationSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Communication model
-    """
 
     class Meta:
         model = Communication
@@ -24,17 +21,12 @@ class CommunicationSerializer(serializers.ModelSerializer):
 
 
 class WhatsAppMessageSerializer(serializers.Serializer):
-    """
-    Serializer for WhatsApp message requests
-    """
 
     to = serializers.CharField(max_length=20)
     message = serializers.CharField()
 
     def validate_to(self, value):
-        """
-        Validate phone number format
-        """
+
         if not value.startswith("+"):
             raise serializers.ValidationError(
                 "Phone number must start with + and country code"
@@ -43,9 +35,6 @@ class WhatsAppMessageSerializer(serializers.Serializer):
 
 
 class EmailMessageSerializer(serializers.Serializer):
-    """
-    Serializer for email message requests
-    """
 
     to = serializers.EmailField()
     subject = serializers.CharField(max_length=255)

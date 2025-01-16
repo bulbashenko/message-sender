@@ -6,10 +6,6 @@ from .models import Communication
 
 
 def send_whatsapp_message(to_number: str, message: str) -> Communication:
-    """
-    Send a WhatsApp message using Meta Cloud API and track it
-    """
-    # Create communication record with all required fields
     comm = Communication(
         type="whatsapp",
         recipient=to_number,
@@ -19,7 +15,6 @@ def send_whatsapp_message(to_number: str, message: str) -> Communication:
     comm.save()  # Save the record
 
     try:
-        # Prepare API request
         url = (
             f"{settings.WHATSAPP_API_URL}/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
         )
@@ -42,7 +37,6 @@ def send_whatsapp_message(to_number: str, message: str) -> Communication:
         if response.status_code in [200, 201]:
             comm.status = "sent"
             comm.sent_at = datetime.now()
-            # Store WhatsApp message ID for tracking
             if "messages" in response_data and len(response_data["messages"]) > 0:
                 comm.whatsapp_message_id = response_data["messages"][0]["id"]
         else:
@@ -58,10 +52,6 @@ def send_whatsapp_message(to_number: str, message: str) -> Communication:
 
 
 def send_email_message(to_email: str, subject: str, message: str) -> Communication:
-    """
-    Send an email and track it in the Communication model
-    """
-    # Create communication record first with all required fields
     comm = Communication(
         type="email",
         recipient=to_email,

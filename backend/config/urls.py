@@ -12,7 +12,7 @@ def index(request):
 
 
 urlpatterns = [
-    path("", index),  # Root URL pattern
+    path("", index),
     path("health/", health_check),
     path("admin/", admin.site.urls),
     path("api/auth/", include("apps.authentication.urls")),
