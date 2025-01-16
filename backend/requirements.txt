@@ -1,0 +1,9 @@
+Django
+djangorestframework
+djangorestframework-simplejwt
+celery
+redis
+python-dotenv
+requests
+django-cors-headers
+social-auth-app-django

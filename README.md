@@ -1,36 +1,140 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Full-Stack Authentication and Communication System
 
-## Getting Started
+A modern full-stack application featuring a Next.js frontend and Django backend, providing robust authentication and communication capabilities including WhatsApp and email integration.
 
-First, run the development server:
+## Project Structure
 
+- `frontend/` - Next.js frontend application
+- `backend/` - Django backend with authentication and communications APIs
+
+## Key Features
+
+### Frontend (Next.js)
+- Modern React-based UI with Next.js 13+
+- Server-side rendering capabilities
+- Optimized font loading with next/font
+- Responsive and interactive user interface
+
+### Backend (Django)
+- **Authentication System**
+  - Token-based authentication with JWT
+  - Token blacklisting for secure logout
+  - Facebook OAuth integration
+  - IP-based country restrictions
+
+- **Communication Features**
+  - WhatsApp integration via Meta Cloud API
+  - Email integration with Gmail SMTP
+  - Asynchronous message handling with Celery
+  - Message tracking and status monitoring
+
+## Setup Instructions
+
+### Backend Setup
+
+1. Set up Python virtual environment:
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install backend dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Configure environment:
+- Copy `backend/.env.example` to `backend/.env`
+- Fill in required credentials and API keys
+
+4. Set up Redis for Celery:
+- Install Redis
+- Ensure Redis server is running on localhost:6379
+
+5. Run migrations:
+```bash
+python manage.py migrate
+```
+
+6. Start the Django server:
+```bash
+python manage.py runserver
+```
+
+7. Start Celery worker:
+```bash
+celery -A config worker -l info
+```
+
+### Frontend Setup
+
+1. Install frontend dependencies:
+```bash
+cd frontend
+npm install
+# or
+yarn install
+```
+
+2. Start the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The frontend will be available at [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Backend Environment Variables
+See `backend/.env.example` for required variables:
+- Django configuration
+- Database settings
+- Email (Gmail) credentials
+- Facebook OAuth credentials
+- WhatsApp API configuration
+- Celery settings
 
-## Learn More
+## API Endpoints
 
-To learn more about Next.js, take a look at the following resources:
+### Authentication
+- `POST /api/auth/register/` - User registration
+- `POST /api/auth/login/` - User login
+- `POST /api/auth/logout/` - User logout
+- `POST /api/auth/facebook/` - Facebook OAuth login
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Communication
+- WhatsApp and Email functionalities available through the communications app
+- Utility functions provided in `communications.utils`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development Setup
 
-## Deploy on Vercel
+### Gmail Configuration
+1. Enable "Less secure app access" or create an App Password
+2. Add Gmail credentials to backend/.env
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Facebook OAuth Setup
+1. Create a Facebook App
+2. Configure OAuth settings
+3. Add credentials to backend/.env
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### WhatsApp Integration
+1. Set up Meta Cloud API
+2. Configure WhatsApp business account
+3. Add API credentials to backend/.env
+
+## Testing
+
+Backend testing utilities available:
+- `whatsapp_test.py` - Test WhatsApp integration
+- `smtp_test.py` - Test email functionality
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request

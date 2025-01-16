@@ -1,0 +1,118 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python/Django Backend
+*.py[cod]
+__pycache__/
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+bin/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+venv/
+env/
+.python-version
+
+# Django specific
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+media/
+static/
+local_settings.py
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Node.js/Next.js Frontend
+node_modules/
+.next/
+out/
+.nuxt/
+.output/
+.vercel/
+.env*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+.DS_Store
+*.pem
+*.tsbuildinfo
+next-env.d.ts
+
+# Coverage and testing
+.coverage
+htmlcov/
+.tox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+coverage/
+.nyc_output/
+junit.xml
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# GeoIP Database
+GeoLite2-City.mmdb
+GeoLite2-Country.mmdb
+
+# Project specific
+whatsapp_logs/
+email_logs/
+test_results/
+*.dump
+
+# Temporary files
+*.bak
+*.tmp
+*~
+.*.sw[po]
+
+# Dependencies
+/.pnp
+.pnp.js
+
+# Debug
+debug.log
+debug/
+
+# Production
+/build
+/dist
+
+# Misc
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
