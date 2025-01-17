@@ -111,26 +111,51 @@ class FacebookLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        fb_access_token = request.data.get("access_token")
-        if not fb_access_token:
+        code = request.data.get("code")
+        redirect_uri = request.data.get("redirect_uri")
+        
+        if not code or not redirect_uri:
             return Response(
-                {"success": False, "error": "Facebook access token is required"},
+                {"success": False, "error": "Authorization code and redirect URI are required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
+            # Exchange code for access token
+            token_response = requests.get(
+                "https://graph.facebook.com/v12.0/oauth/access_token",
+                params={
+                    "client_id": settings.SOCIAL_AUTH_FACEBOOK_KEY,
+                    "client_secret": settings.SOCIAL_AUTH_FACEBOOK_SECRET,
+                    "redirect_uri": redirect_uri,
+                    "code": code,
+                },
+            )
+            token_data = token_response.json()
+
+            if "error" in token_data:
+                logger.error(f"Facebook token exchange error: {token_data}")
+                return Response(
+                    {"success": False, "error": "Failed to exchange code for token"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            access_token = token_data.get("access_token")
+            
+            # Get user info using the access token
             fb_response = requests.get(
-                f"https://graph.facebook.com/me",
+                "https://graph.facebook.com/me",
                 params={
                     "fields": "id,email",
-                    "access_token": fb_access_token,
+                    "access_token": access_token,
                 },
             )
             fb_data = fb_response.json()
 
             if "error" in fb_data:
+                logger.error(f"Facebook user info error: {fb_data}")
                 return Response(
-                    {"success": False, "error": "Invalid Facebook token"},
+                    {"success": False, "error": "Failed to get user information"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
