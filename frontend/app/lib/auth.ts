@@ -17,7 +17,15 @@ const AUTH_COOKIE_NAME = 'auth_tokens';
 const COOKIE_EXPIRY_DAYS = 3;
 
 export const setAuthTokens = (tokens: AuthTokens) => {
-  Cookies.set(AUTH_COOKIE_NAME, JSON.stringify(tokens), { expires: COOKIE_EXPIRY_DAYS });
+  Cookies.set(AUTH_COOKIE_NAME, JSON.stringify(tokens), {
+    expires: COOKIE_EXPIRY_DAYS,
+    path: '/',
+    sameSite: 'lax',
+    secure: window.location.protocol === 'https:',
+  });
+  
+  // Debug: Verify token was set
+  console.log('Auth tokens set, current tokens:', getAuthTokens());
 };
 
 export const getAuthTokens = (): AuthTokens | null => {
@@ -62,18 +70,65 @@ export const refreshTokens = async (): Promise<AuthTokens> => {
   }
 };
 
-export const getCurrentUser = (): User | null => {
-  const tokens = getAuthTokens();
-  if (!tokens?.access) return null;
+interface JWTPayload {
+  id: string;
+  email: string;
+  name: string;
+  exp: number;
+  // Add other potential fields from your JWT
+  sub?: string;
+  iat?: number;
+}
+
+export const getCurrentUser = async (): Promise<User | null> => {
+  let tokens = getAuthTokens();
+  console.log('Getting current user, tokens present:', !!tokens);
+  
+  if (!tokens?.access) {
+    console.log('No access token found');
+    return null;
+  }
   
   try {
-    const decoded = jwtDecode<User>(tokens.access);
+    // First try to decode without refresh
+    const decoded = jwtDecode<JWTPayload>(tokens.access);
+    console.log('Token decoded:', {
+      hasEmail: !!decoded.email,
+      hasId: !!decoded.id,
+      expiresIn: new Date(decoded.exp * 1000).toISOString()
+    });
+
     // Check if token is expired
-    if ((decoded as any).exp * 1000 < Date.now()) {
-      return null;
+    if (decoded.exp * 1000 < Date.now()) {
+      console.log('Token expired, attempting refresh');
+      try {
+        tokens = await refreshTokens();
+        const newDecoded = jwtDecode<JWTPayload>(tokens.access);
+        console.log('New token decoded after refresh:', {
+          hasEmail: !!newDecoded.email,
+          hasId: !!newDecoded.id,
+          expiresIn: new Date(newDecoded.exp * 1000).toISOString()
+        });
+        
+        return {
+          id: newDecoded.id,
+          email: newDecoded.email,
+          name: newDecoded.name
+        };
+      } catch (error) {
+        console.error('Token refresh failed:', error);
+        return null;
+      }
     }
-    return decoded;
-  } catch {
+
+    // Return user info from valid token
+    return {
+      id: decoded.id,
+      email: decoded.email,
+      name: decoded.name
+    };
+  } catch (error) {
+    console.error('Token decode failed:', error);
     return null;
   }
 };

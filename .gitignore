@@ -64,6 +64,7 @@
 /frontend/.pnpm-debug.log*
 
 # TypeScript
+
 /frontend/*.tsbuildinfo
 /frontend/next-env.d.ts
 

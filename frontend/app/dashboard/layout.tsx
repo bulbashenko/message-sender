@@ -13,15 +13,32 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) {
-      router.push('/');
-    }
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!user) {
+          router.push('/');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        router.push('/');
+      }
+    };
+    
+    checkAuth();
   }, [router]);
 
   const handleLogout = async () => {
-    await logout();
-    router.push('/');
+    try {
+      await logout();
+      // Add a small delay to ensure auth state is cleared
+      await new Promise(resolve => setTimeout(resolve, 100));
+      router.replace('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Still try to redirect even if logout fails
+      router.replace('/');
+    }
   };
 
   return (

@@ -9,10 +9,19 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    const user = getCurrentUser();
-    if (user) {
-      router.push('/dashboard');
-    }
+    const checkAuth = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (user) {
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        // If auth check fails, stay on the login page
+      }
+    };
+    
+    checkAuth();
   }, [router]);
 
   return (

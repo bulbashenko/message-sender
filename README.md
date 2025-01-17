@@ -1,140 +1,226 @@
-# Full-Stack Authentication and Communication System
+# Communication and Authentication System 🔐📱
 
-A modern full-stack application featuring a Next.js frontend and Django backend, providing robust authentication and communication capabilities including WhatsApp and email integration.
+A robust, scalable system for handling user authentication and multi-channel communications, built with Django and Next.js. This project implements secure authentication mechanisms, social login capabilities, and multi-channel messaging through WhatsApp and Email.
 
-## Project Structure
+![Project Banner](frontend/public/globe.svg)
 
-- `frontend/` - Next.js frontend application
-- `backend/` - Django backend with authentication and communications APIs
+## 🌟 Features
 
-## Key Features
+### Authentication System
+- 🔑 Token-based authentication with JWT
+- 🔄 Social media integration (Facebook OAuth2)
+- 🚪 Secure logout with token blacklisting
+- 🌍 IP-based access restrictions by country
+- 🔒 Password strength validation
+- ⏱️ Session management
 
-### Frontend (Next.js)
-- Modern React-based UI with Next.js 13+
-- Server-side rendering capabilities
-- Optimized font loading with next/font
-- Responsive and interactive user interface
+### Communication Channels
+- 💬 WhatsApp Business API integration
+- 📧 Email system integration (Gmail/Office 365)
+- ⚡ Asynchronous message processing
+- 📊 Message delivery tracking
+- 🔄 Error handling and retry mechanisms
+
+## 🛠️ Tech Stack
 
 ### Backend (Django)
-- **Authentication System**
-  - Token-based authentication with JWT
-  - Token blacklisting for secure logout
-  - Facebook OAuth integration
-  - IP-based country restrictions
+- Python 3.8+
+- Django REST Framework
+- PostgreSQL
+- Redis
+- Celery
+- JWT Authentication
 
-- **Communication Features**
-  - WhatsApp integration via Meta Cloud API
-  - Email integration with Gmail SMTP
-  - Asynchronous message handling with Celery
-  - Message tracking and status monitoring
+### Frontend (Next.js)
+- React 18+
+- TypeScript
+- Tailwind CSS
+- Shadcn UI
+- Next.js 13+ (App Router)
 
-## Setup Instructions
+## 🚀 Getting Started
+
+### Prerequisites
+```bash
+Python 3.8+
+Node.js 16+
+Redis Server
+PostgreSQL
+```
 
 ### Backend Setup
 
-1. Set up Python virtual environment:
+1. Clone the repository
 ```bash
+git clone [repository-url]
 cd backend
+```
+
+2. Create and activate virtual environment
+```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install backend dependencies:
+3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Configure environment:
-- Copy `backend/.env.example` to `backend/.env`
-- Fill in required credentials and API keys
+4. Configure environment variables
+```bash
+cp .env.example .env
+# Edit .env with your configurations
+```
 
-4. Set up Redis for Celery:
-- Install Redis
-- Ensure Redis server is running on localhost:6379
+Required environment variables:
+```env
+DEBUG=True
+REDIS_URL=redis://localhost:6379/0
+FACEBOOK_APP_ID=your-facebook-app-id
+FACEBOOK_APP_SECRET=your-facebook-app-secret
+```
 
-5. Run migrations:
+5. Run migrations
 ```bash
 python manage.py migrate
 ```
 
-6. Start the Django server:
+6. Start development server
 ```bash
 python manage.py runserver
 ```
 
-7. Start Celery worker:
-```bash
-celery -A config worker -l info
-```
-
 ### Frontend Setup
 
-1. Install frontend dependencies:
+1. Navigate to frontend directory
 ```bash
 cd frontend
-npm install
-# or
-yarn install
 ```
 
-2. Start the development server:
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Configure environment variables
+```bash
+cp .env.example .env.local
+# Edit .env.local with your configurations
+```
+
+Required environment variables:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_FACEBOOK_APP_ID=your-facebook-app-id
+```
+
+4. Start development server
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-The frontend will be available at [http://localhost:3000](http://localhost:3000)
+## 🏗️ Architecture
 
-## Environment Configuration
+### Backend Architecture
+The backend follows Clean Architecture principles and SOLID design patterns:
 
-### Backend Environment Variables
-See `backend/.env.example` for required variables:
-- Django configuration
-- Database settings
-- Email (Gmail) credentials
-- Facebook OAuth credentials
-- WhatsApp API configuration
-- Celery settings
+#### Apps Structure
+```
+backend/
+├── apps/
+│   ├── authentication/    # User authentication
+│   ├── communications/    # Message handling
+│   └── core/             # Shared functionality
+└── config/               # Project configuration
+```
 
-## API Endpoints
+### Frontend Architecture
+```
+frontend/
+├── app/                  # Next.js 13+ App Router
+│   ├── auth/            # Authentication pages
+│   ├── dashboard/       # User dashboard
+│   └── components/      # Reusable components
+├── lib/                 # Utilities and helpers
+└── public/              # Static assets
+```
 
-### Authentication
-- `POST /api/auth/register/` - User registration
-- `POST /api/auth/login/` - User login
-- `POST /api/auth/logout/` - User logout
-- `POST /api/auth/facebook/` - Facebook OAuth login
+## 🔒 Security Features
 
-### Communication
-- WhatsApp and Email functionalities available through the communications app
-- Utility functions provided in `communications.utils`
+- JWT token management
+- CSRF protection
+- Rate limiting
+- Input validation
+- Secure password handling
+- Session security
+- IP-based restrictions
 
-## Development Setup
+## 🚦 Development Workflow
 
-### Gmail Configuration
-1. Enable "Less secure app access" or create an App Password
-2. Add Gmail credentials to backend/.env
+1. Create a new branch for your feature
+```bash
+git checkout -b feature/your-feature-name
+```
 
-### Facebook OAuth Setup
-1. Create a Facebook App
-2. Configure OAuth settings
-3. Add credentials to backend/.env
+2. Make your changes and commit using conventional commits
+```bash
+git commit -m "feat: add new feature"
+git commit -m "fix: resolve bug issue"
+```
 
-### WhatsApp Integration
-1. Set up Meta Cloud API
-2. Configure WhatsApp business account
-3. Add API credentials to backend/.env
+3. Push changes and create a pull request
+```bash
+git push origin feature/your-feature-name
+```
 
-## Testing
+## 🐛 Troubleshooting
 
-Backend testing utilities available:
-- `whatsapp_test.py` - Test WhatsApp integration
-- `smtp_test.py` - Test email functionality
+### Common Issues
 
-## Contributing
+1. **Redis Connection Error**
+```bash
+# Ensure Redis is running
+redis-cli ping  # Should return PONG
+```
+
+2. **Database Migration Issues**
+```bash
+# Reset migrations
+python manage.py migrate --fake authentication zero
+python manage.py migrate authentication
+```
+
+3. **Frontend API Connection Issues**
+- Check if backend server is running
+- Verify environment variables
+- Check CORS settings in backend
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
+3. Commit your changes using conventional commits
+4. Push to your branch
+5. Create a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 💬 Support
+
+For support and questions:
+- 📚 Review [documentation](docs/)
+- 🐛 Check [issue tracker](issues/)
+- 📧 Contact development team
+
+---
+
+<div align="center">
+Built with ❤️ using Django, Next.js, and modern web technologies.
+
+![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
+![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+</div>
