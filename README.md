@@ -2,7 +2,6 @@
 
 A robust, scalable system for handling user authentication and multi-channel communications, built with Django and Next.js. This project implements secure authentication mechanisms, social login capabilities, and multi-channel messaging through WhatsApp and Email.
 
-![Project Banner](frontend/public/globe.svg)
 
 ## 🌟 Features
 
