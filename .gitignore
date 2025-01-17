@@ -1,121 +1,97 @@
-# Environment variables
-.env
-.env.*
-!.env.example
+# Backend (Django)
+/backend/.env
+/backend/.env.*
+!/backend/.env.example
+/backend/db.sqlite3
+/backend/*.log
+/backend/django.log
+/backend/whatsapp_test.py
+/backend/smtp_test.py
 
-# Python/Django Backend
-*.py[cod]
-__pycache__/
-*.so
-.Python
-*.egg
-*.egg-info/
-dist/
-build/
-eggs/
-parts/
-bin/
-var/
-sdist/
-develop-eggs/
-.installed.cfg
-lib/
-lib64/
-venv/
-env/
-.python-version
-*/migrations/
-**/migrations/
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+**/*.egg
+**/*.egg-info
+**/dist/
+**/build/
+**/.eggs/
+**/.Python
+**/pip-log.txt
+
+# Django migrations
+**/migrations/*.py
 !**/migrations/__init__.py
 
-# Django specific
-*.log
-*.pot
-*.pyc
-db.sqlite3
-db.sqlite3-journal
-media/
-static/
-local_settings.py
+# Virtual Environment
+/backend/venv/
+/backend/.venv/
+/backend/env/
+.python-version
+
+# Django media and static
+/backend/media/
+/backend/static/
+/backend/staticfiles/
 
 # Celery
-celerybeat-schedule
-celerybeat.pid
+/backend/celerybeat-schedule
+/backend/celerybeat.pid
+/backend/*.pid
 
-# Node.js/Next.js Frontend
-node_modules/
-.next/
-out/
-.nuxt/
-.output/
-.vercel/
-.env*.local
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# Frontend (Next.js)
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+/frontend/build/
+/frontend/.vercel/
+/frontend/coverage/
+/frontend/.nyc_output/
 
-# Build outputs
-.DS_Store
-*.pem
-*.tsbuildinfo
-next-env.d.ts
+# Frontend env files
+/frontend/.env
+/frontend/.env.*
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
 
-# Coverage and testing
-.coverage
-htmlcov/
-.tox/
-.coverage.*
+# Frontend logs
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.pnpm-debug.log*
+
+# TypeScript
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+
+# Package managers
+/frontend/yarn.lock
+/frontend/package-lock.json
+/frontend/pnpm-lock.yaml
+!/frontend/pnpm-lock.yaml  # Раскомментируйте, если хотите сохранять pnpm-lock
+
+# Cache
+/frontend/.eslintcache
 .cache
-nosetests.xml
-coverage.xml
-coverage/
-.nyc_output/
-junit.xml
+**/.temрdir
 
 # IDE and editors
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
 .DS_Store
 Thumbs.db
-.project
-.classpath
-.settings/
-*.sublime-workspace
-*.sublime-project
 
-# GeoIP Database
-GeoLite2-City.mmdb
-GeoLite2-Country.mmdb
-
-# Project specific
-whatsapp_logs/
-email_logs/
-test_results/
-*.dump
-
-# Temporary files
-*.bak
-*.tmp
-*~
-.*.sw[po]
-
-# Dependencies
-/.pnp
-.pnp.js
-
-# Debug
-debug.log
-debug/
-
-# Production
-/build
-/dist
-
-# Misc
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
+# Testing
+/frontend/coverage/
+/frontend/.nyc_output/
+/backend/.coverage
+/backend/htmlcov/
+/backend/.pytest_cache/
+/backend/pytest.xml
+/backend/.tox/

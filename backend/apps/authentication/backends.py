@@ -11,13 +11,10 @@ User = get_user_model()
 class EmailBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         try:
-            # Check if the username parameter contains an email
             user = User.objects.get(Q(email=username) | Q(username=username))
             if user.check_password(password):
-                # Get client IP
                 ip_address = self.get_client_ip(request)
                 if ip_address:
-                    # Validate country restriction
                     is_allowed, country_code = validate_country_restriction(
                         user, ip_address
                     )
@@ -27,7 +24,6 @@ class EmailBackend(ModelBackend):
                         )
                         return None
 
-                    # Update last login IP
                     user.last_login_ip = ip_address
                     user.save(update_fields=["last_login_ip"])
 
@@ -42,9 +38,6 @@ class EmailBackend(ModelBackend):
             return None
 
     def get_client_ip(self, request):
-        """
-        Get client IP from request
-        """
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for:
             ip = x_forwarded_for.split(",")[0]

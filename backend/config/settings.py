@@ -101,7 +101,6 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {"fields": "id,name,email"}
 WHATSAPP_API_URL = os.getenv("WHATSAPP_API_URL")
 WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
 WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN")
-WHATSAPP_TEST_NUMBER = os.getenv("WHATSAPP_TEST_NUMBER")
 
 IP_API_URL = "https://ipapi.co/{}/json/"
 
@@ -180,7 +179,6 @@ LOGGING = {
     },
 }
 
-# Apps path
 import sys
 
 sys.path.insert(0, os.path.join(BASE_DIR, "apps"))

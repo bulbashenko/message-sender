@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import FacebookProvider from "next-auth/providers/facebook";
 
 declare module "next-auth" {
   interface User {
@@ -21,12 +22,49 @@ export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
   },
+  pages: {
+    signIn: "/login",
+  },
   callbacks: {
-    async jwt({ token, user }) {
-      console.log("[JWT Callback] Начало обработки токена:", { token, user });
+    async signIn({ account }) {
+      if (account?.provider === "facebook") {
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/auth/login/facebook/`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              access_token: account.access_token,
+            }),
+          });
 
-      // Если пользователь только что вошёл, сохраняем токены
-      if (user) {
+          const data = await response.json();
+
+          if (!response.ok) {
+            console.error("[Facebook Login] Error:", data.error);
+            return false;
+          }
+
+          // Store the JWT tokens
+          account.access = data.data.access;
+          account.refresh = data.data.refresh;
+          return true;
+        } catch (error) {
+          console.error("[Facebook Login] Error:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+
+    async jwt({ token, user, account }) {
+      console.log("[JWT Callback] Начало обработки токена:", { token, user, account });
+
+      if (account?.provider === "facebook") {
+        token.access = account.access;
+        token.refresh = account.refresh;
+      } else if (user) {
         token.access = user.access;
         token.refresh = user.refresh;
       }
@@ -48,6 +86,10 @@ export const authOptions: AuthOptions = {
     },
   },
   providers: [
+    FacebookProvider({
+      clientId: "965280662128440",
+      clientSecret: "4e432e2f4f2b9a190995c4d39cd716ee"
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {

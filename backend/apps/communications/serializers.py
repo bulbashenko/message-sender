@@ -3,7 +3,6 @@ from .models import Communication
 
 
 class CommunicationSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Communication
         fields = [
@@ -21,7 +20,6 @@ class CommunicationSerializer(serializers.ModelSerializer):
 
 
 class WhatsAppMessageSerializer(serializers.Serializer):
-
     to = serializers.CharField(max_length=20)
     message = serializers.CharField()
 
@@ -35,7 +33,6 @@ class WhatsAppMessageSerializer(serializers.Serializer):
 
 
 class EmailMessageSerializer(serializers.Serializer):
-
     to = serializers.EmailField()
     subject = serializers.CharField(max_length=255)
     message = serializers.CharField()

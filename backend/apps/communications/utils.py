@@ -1,7 +1,7 @@
-from datetime import datetime
 import requests
 from django.core.mail import send_mail
 from django.conf import settings
+from django.utils import timezone
 from .models import Communication
 
 
@@ -10,9 +10,9 @@ def send_whatsapp_message(to_number: str, message: str) -> Communication:
         type="whatsapp",
         recipient=to_number,
         content=message,
-        status="pending",  # Explicitly set status
+        status="pending",
     )
-    comm.save()  # Save the record
+    comm.save()
 
     try:
         url = (
@@ -30,13 +30,12 @@ def send_whatsapp_message(to_number: str, message: str) -> Communication:
             "text": {"body": message},
         }
 
-        # Send message
         response = requests.post(url, headers=headers, json=data)
         response_data = response.json()
 
         if response.status_code in [200, 201]:
             comm.status = "sent"
-            comm.sent_at = datetime.now()
+            comm.sent_at = timezone.now()
             if "messages" in response_data and len(response_data["messages"]) > 0:
                 comm.whatsapp_message_id = response_data["messages"][0]["id"]
         else:
@@ -57,9 +56,9 @@ def send_email_message(to_email: str, subject: str, message: str) -> Communicati
         recipient=to_email,
         subject=subject,
         content=message,
-        status="pending",  # Explicitly set status
+        status="pending",
     )
-    comm.save()  # Save the record
+    comm.save()
 
     try:
         send_mail(
@@ -71,7 +70,7 @@ def send_email_message(to_email: str, subject: str, message: str) -> Communicati
         )
 
         comm.status = "sent"
-        comm.sent_at = datetime.now()
+        comm.sent_at = timezone.now()
 
     except Exception as e:
         comm.status = "failed"

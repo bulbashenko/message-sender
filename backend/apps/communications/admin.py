@@ -25,22 +25,18 @@ class CommunicationAdmin(admin.ModelAdmin):
     ordering = ["-created_at"]
 
     def has_add_permission(self, request):
-        """Disable manual creation of communications"""
         return False
 
     def has_change_permission(self, request, obj=None):
-        """Disable editing of communications"""
         return False
 
     def get_type_icon(self, obj):
-        """Return an icon based on communication type"""
         icons = {"email": "📧", "whatsapp": "💬"}
         return f"{icons.get(obj.type, '❓')} {obj.type.title()}"
 
     get_type_icon.short_description = "Type"
 
     def get_subject_or_preview(self, obj):
-        """Return subject for emails or content preview for WhatsApp"""
         if obj.type == "email":
             return obj.subject or "(No subject)"
         return (obj.content[:50] + "...") if len(obj.content) > 50 else obj.content

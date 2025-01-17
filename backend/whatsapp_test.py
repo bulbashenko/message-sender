@@ -2,15 +2,10 @@ import os
 from dotenv import load_dotenv
 import requests
 
-# Load environment variables
 load_dotenv()
 
 
-def test_whatsapp_message():
-    """
-    Test WhatsApp message sending using Meta Cloud API
-    """
-    # Get configuration from environment
+def test_whatsapp_message(message_text=None):
     api_url = os.getenv("WHATSAPP_API_URL")
     phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
     access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
@@ -20,7 +15,6 @@ def test_whatsapp_message():
         print("Error: Missing WhatsApp configuration. Please check your .env file.")
         return False
 
-    # Prepare the API request
     url = f"{api_url}/{phone_number_id}/messages"
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -28,14 +22,19 @@ def test_whatsapp_message():
     }
     data = {
         "messaging_product": "whatsapp",
-        "to": test_number,
+        "recipient_type": "individual",
+        "to": test_number,  # Format: +XXXXXXXXXXXX 
         "type": "text",
-        "text": {"body": "Hello! This is a test message from your Django app."},
+        "text": {
+            "preview_url": True,
+            "body": message_text
+            or "Hello! This is a custom message from your Django app.",
+        },
     }
 
     try:
-        # Send the message
         response = requests.post(url, headers=headers, json=data)
+        print(url, headers, data)
         response_data = response.json()
 
         if response.status_code in [200, 201]:
@@ -55,4 +54,7 @@ def test_whatsapp_message():
 
 if __name__ == "__main__":
     print("Testing WhatsApp Integration...")
-    test_whatsapp_message()
+    custom_message = input(
+        "Enter your message (press Enter for default message): "
+    ).strip()
+    test_whatsapp_message(custom_message if custom_message else None)

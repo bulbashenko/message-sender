@@ -76,13 +76,11 @@ class LoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        # Check IP country restrictions
         client_ip = get_client_ip(request)
         user.last_login_ip = client_ip
         user.save()
 
         try:
-            # Use ipapi.co service for IP lookup
             response = requests.get(settings.IP_API_URL.format(client_ip))
             if response.status_code == 200:
                 country_code = response.json().get("country_code")
@@ -96,7 +94,6 @@ class LoginView(APIView):
                     )
         except Exception as e:
             logger.error(f"IP lookup error: {str(e)}")
-            # Continue if IP lookup fails
 
         refresh = RefreshToken.for_user(user)
         return Response(
@@ -122,7 +119,6 @@ class FacebookLoginView(APIView):
             )
 
         try:
-            # Verify token with Facebook
             fb_response = requests.get(
                 f"https://graph.facebook.com/me",
                 params={
@@ -141,7 +137,6 @@ class FacebookLoginView(APIView):
             try:
                 user = User.objects.get(facebook_id=fb_data["id"])
             except User.DoesNotExist:
-                # Create new user if doesn't exist
                 email = fb_data.get("email", "").lower()
                 username = email.split("@")[0] if email else f"fb_{fb_data['id']}"
 
