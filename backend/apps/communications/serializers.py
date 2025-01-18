@@ -3,10 +3,6 @@ from .models import Communication
 
 
 class CommunicationHistorySerializer(serializers.ModelSerializer):
-    """
-    Serializer for Communication model.
-    Used for displaying message history in the dashboard.
-    """
     class Meta:
         model = Communication
         fields = [
@@ -18,10 +14,6 @@ class CommunicationHistorySerializer(serializers.ModelSerializer):
 
 
 class WhatsAppMessageSerializer(serializers.Serializer):
-    """
-    Serializer for WhatsApp messages.
-    Supports both template and regular text messages.
-    """
     to = serializers.CharField(max_length=20)
     message = serializers.CharField(required=False)
     message_type = serializers.ChoiceField(choices=['template', 'text'], default='text')
@@ -42,10 +34,6 @@ class WhatsAppMessageSerializer(serializers.Serializer):
 
 
 class EmailMessageSerializer(serializers.Serializer):
-    """
-    Serializer for email messages.
-    Validates message data without persisting to database.
-    """
     to = serializers.EmailField()
     subject = serializers.CharField(max_length=255)
     message = serializers.CharField()

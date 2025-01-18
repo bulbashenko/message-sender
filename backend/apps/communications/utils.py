@@ -6,10 +6,6 @@ from .models import Communication
 
 
 def send_whatsapp_message(to_number: str, message: str = None, message_type: str = "text", user = None) -> dict:
-    """
-    Send WhatsApp message and return delivery status.
-    Supports both template and text messages.
-    """
     try:
         url = f"https://graph.facebook.com/v21.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
         headers = {
@@ -66,9 +62,6 @@ def send_whatsapp_message(to_number: str, message: str = None, message_type: str
 
 
 def send_email_message(to_email: str, subject: str, message: str, user) -> dict:
-    """
-    Send email message and return delivery status.
-    """
     try:
         send_mail(
             subject=subject,
