@@ -1,135 +1,352 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { WhatsAppForm } from '@/app/components/dashboard/whatsapp-form';
-import { EmailForm } from '@/app/components/dashboard/email-form';
-import { MessageHistory } from '@/app/components/dashboard/message-history';
+import React, { useState } from "react";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { sendEmail, sendWhatsApp } from "@/app/api/services/communications";
+import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
+import { motion } from "motion/react";
+import { Mail, MessageSquare, CheckCircle, AlertCircle } from "lucide-react";
+import axios from "axios";
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 15
-    }
-  }
+type MessageHistoryEntry = {
+  id: number;
+  type: "email" | "whatsapp";
+  timestamp: Date;
+  recipient: string;
+  subject?: string; // Only for email
+  message: string;
+  response: string;
 };
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.3
+export default function DashboardClient() {
+  const { data: session, status } = useSession();
+
+  // Email state
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+
+  // WhatsApp state
+  const [phone, setPhone] = useState("");
+  const [whatsAppMessage, setWhatsAppMessage] = useState("");
+
+  // Достаём токен
+  const userAccessToken = session?.user?.access;
+
+  // Toast для уведомлений
+  const { toast } = useToast();
+
+  // История отправленных сообщений
+  const [messageHistory, setMessageHistory] = useState<MessageHistoryEntry[]>(
+    [],
+  );
+
+  // Генерация уникального ID для записей истории
+  const generateId = () => Date.now() + Math.random();
+
+  // Если сессия в процессе загрузки
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl text-gray-700 dark:text-gray-300">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  // Если пользователь не залогинен
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl text-gray-700 dark:text-gray-300">
+          Access Denied
+        </div>
+      </div>
+    );
+  }
+
+  // Отправка email
+  async function handleSendEmail() {
+    console.log("handleSendEmail: clicked!");
+    console.log("access token:", userAccessToken);
+    if (!userAccessToken) {
+      console.warn("No access token - skip request");
+      return;
+    }
+    if (!userAccessToken) return;
+    try {
+      const res = await sendEmail(userAccessToken, email, subject, message);
+
+      toast({
+        title: "Email Sent",
+        description: `Response: ${JSON.stringify(res)}`,
+      });
+
+      // Добавляем запись в историю
+      const newEntry: MessageHistoryEntry = {
+        id: generateId(),
+        type: "email",
+        timestamp: new Date(),
+        recipient: email,
+        subject,
+        message,
+        response: JSON.stringify(res),
+      };
+      setMessageHistory((prev) => [newEntry, ...prev]);
+
+      // Очищаем поля
+      setEmail("");
+      setSubject("");
+      setMessage("");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Error sending email:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Error data:", error.response?.data);
+      }
+      toast({
+        title: "Error while sending email",
+        description:
+          error.response?.data?.error || error.message || "Unknown error",
+        variant: "destructive",
+      });
     }
   }
-};
 
-export default function DashboardPage() {
+  // Отправка WhatsApp
+  async function handleSendWhatsApp() {
+    if (!userAccessToken) return;
+    try {
+      const res = await sendWhatsApp(userAccessToken, phone, whatsAppMessage);
+
+      toast({
+        title: "WhatsApp Message Sent",
+        description: `Response: ${JSON.stringify(res)}`,
+      });
+
+      // Добавляем запись в историю
+      const newEntry: MessageHistoryEntry = {
+        id: generateId(),
+        type: "whatsapp",
+        timestamp: new Date(),
+        recipient: phone,
+        message: whatsAppMessage,
+        response: JSON.stringify(res),
+      };
+      setMessageHistory((prev) => [newEntry, ...prev]);
+
+      // Очищаем поля
+      setPhone("");
+      setWhatsAppMessage("");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Error sending WhatsApp:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Error data:", error.response?.data);
+      }
+      toast({
+        title: "Error while sending WhatsApp message",
+        description:
+          error.response?.data?.error || error.message || "Unknown error",
+        variant: "destructive",
+      });
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
-      {/* Background patterns */}
-      <div className="absolute inset-0 overflow-hidden opacity-50">
-        <div className="absolute top-0 left-0 w-full h-full bg-grid-pattern" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-transparent to-white/50" />
-      </div>
-      
-      <div className="container mx-auto px-4 py-8 space-y-8 relative">
-        {/* Enhanced Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, type: "spring" }}
-          className="bg-white rounded-xl shadow-xl p-8 border border-gray-200 relative overflow-hidden hover:shadow-2xl transition-all duration-300 group"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 opacity-50 group-hover:opacity-70 transition-opacity duration-300" />
-          <div className="absolute inset-0 bg-grid-pattern opacity-5 group-hover:opacity-10 transition-opacity duration-300" />
-          <div className="relative z-10">
-            <motion.div 
-              className="flex items-center space-x-3"
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-            >
-              <motion.svg
-                whileHover={{ scale: 1.2, rotate: 180 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="w-8 h-8 text-blue-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16m-7 6h7"
+    <motion.div
+      className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="mb-8 flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
+            Welcome to Dashboard page!
+          </h1>
+        </header>
+
+        {/* Две колонки */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Отправка Email */}
+          <Card className="p-6 shadow-lg bg-white dark:bg-gray-800">
+            <div className="flex items-center mb-4">
+              <Mail className="w-6 h-6 text-blue-500 mr-2" />
+              <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                Send Email
+              </h2>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Recipient Email
+                </label>
+                <Input
+                  type="email"
+                  placeholder="example@domain.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="mt-1"
                 />
-              </motion.svg>
-              <motion.h1 
-                className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent bg-300 animate-gradient"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Email Subject
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Subject"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Message
+                </label>
+                <textarea
+                  className="mt-1 border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200"
+                  placeholder="Enter the email text..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={4}
+                  required
+                />
+              </div>
+              <Button
+                onClick={handleSendEmail}
+                className="w-full flex items-center justify-center"
               >
-                Dashboard
-              </motion.h1>
-            </motion.div>
-            <motion.p 
-              className="mt-2 text-gray-600 font-medium"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              Manage your communications in one place
-            </motion.p>
-          </div>
-        </motion.div>
-
-        {/* Enhanced Grid Layout */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
-        >
-          <motion.div 
-            variants={itemVariants}
-            className="w-full group"
-          >
-            <div className="transform-gpu transition-all duration-300 ease-out group-hover:translate-y-[-4px] group-hover:shadow-xl relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <WhatsAppForm />
+                <Mail className="w-4 h-4 mr-2" />
+                <span>Send Email</span>
+              </Button>
             </div>
-          </motion.div>
-          <motion.div 
-            variants={itemVariants}
-            className="w-full group"
-          >
-            <div className="transform-gpu transition-all duration-300 ease-out group-hover:translate-y-[-4px] group-hover:shadow-xl relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <EmailForm />
-            </div>
-          </motion.div>
-        </motion.div>
+          </Card>
 
-        {/* Message History Section */}
-        <motion.div
-          variants={itemVariants}
-          initial="hidden"
-          animate="show"
-          className="w-full group"
-        >
-          <div className="transform-gpu transition-all duration-300 ease-out group-hover:translate-y-[-4px] group-hover:shadow-xl relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <MessageHistory />
+          {/* Отправка WhatsApp */}
+          <Card className="p-6 shadow-lg bg-white dark:bg-gray-800">
+            <div className="flex items-center mb-4">
+              <MessageSquare className="w-6 h-6 text-green-500 mr-2" />
+              <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                Send WhatsApp
+              </h2>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Phone Number
+                </label>
+                <Input
+                  type="tel"
+                  placeholder="+71234567890"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Message
+                </label>
+                <textarea
+                  className="mt-1 border rounded-md p-2 w-full focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-200"
+                  placeholder="Enter the message text..."
+                  value={whatsAppMessage}
+                  onChange={(e) => setWhatsAppMessage(e.target.value)}
+                  rows={4}
+                  required
+                />
+              </div>
+              <Button
+                onClick={handleSendWhatsApp}
+                className="w-full flex items-center justify-center"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                <span>Send WhatsApp</span>
+              </Button>
+            </div>
+          </Card>
+        </div>
+
+        {/* История отправленных сообщений */}
+        <Card className="p-6 shadow-lg bg-white dark:bg-gray-800">
+          <div className="flex items-center mb-4">
+            <CheckCircle className="w-6 h-6 text-indigo-500 mr-2" />
+            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+              Sent Messages History
+            </h2>
           </div>
-        </motion.div>
+          {messageHistory.length === 0 ? (
+            <p className="text-gray-600 dark:text-gray-400">
+              No sent messages.
+            </p>
+          ) : (
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {messageHistory.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="p-4 border rounded-md bg-gray-50 dark:bg-gray-700 flex flex-col md:flex-row items-start md:items-center justify-between"
+                >
+                  <div className="flex items-center space-x-4">
+                    {entry.type === "email" ? (
+                      <Mail className="w-5 h-5 text-blue-500" />
+                    ) : (
+                      <MessageSquare className="w-5 h-5 text-green-500" />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                        {entry.type === "email" ? "Email" : "WhatsApp"}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Recipient: {entry.recipient}
+                      </p>
+                      {entry.type === "email" && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Subject: {entry.subject}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-2 md:mt-0 flex items-center space-x-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {entry.timestamp.toLocaleString()}
+                    </span>
+                    <span
+                      className={`flex items-center text-xs font-semibold px-2 py-1 rounded ${
+                        entry.response.includes("success")
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {entry.response.includes("success") ? (
+                        <>
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Success
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="w-4 h-4 mr-1" />
+                          Error
+                        </>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -3,21 +3,19 @@ import { ReactNode } from "react";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/authOptions";
 import { redirect } from "next/navigation";
-import DashboardHeader from "@/components/dashboard-header";
 
-export default async function Dashboard({ children }: { children: ReactNode }) {
+export default async function AuthLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (session) {
     // Если юзер уже залогинился → на дашборд
-    redirect("/login");
+    redirect("/dashboard");
   }
 
   // Если не залогинен — показываем страницы (login или register)
-  return (
-    <div>
-      <DashboardHeader />
-      {children}
-    </div>
-  );
+  return <div>{children}</div>;
 }
