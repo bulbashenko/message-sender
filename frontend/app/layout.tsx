@@ -1,13 +1,14 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { NextAuthProvider } from "@/app/providers"; // Смотри providers.ts, где оборачиваем в SessionProvider
+import { Toaster } from "@/components/ui/toaster";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
-  title: 'Communication Dashboard',
-  description: 'Send and manage your WhatsApp and Email communications',
+  title: "Message Sender",
+  description: "Send messages to your customers",
 };
 
 export default function RootLayout({
@@ -18,10 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-screen bg-gray-50">
+        <NextAuthProvider>
           {children}
           <Toaster />
-        </div>
+        </NextAuthProvider>
       </body>
     </html>
   );
