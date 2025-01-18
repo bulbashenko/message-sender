@@ -1,225 +1,198 @@
-# Communication and Authentication System 🔐📱
+**Communication and Authentication System 🔐📱**
 
-A robust, scalable system for handling user authentication and multi-channel communications, built with Django and Next.js. This project implements secure authentication mechanisms, social login capabilities, and multi-channel messaging through WhatsApp and Email.
+> 👨‍💻 **Project Authors**:
+> - Backend - Hryshyn Mykyta
+> - Frontend - Aleksandr Albekov
 
+> 🎯 A test task for developing a communication and authentication system using Django and Next.js.
 
-## 🌟 Features
+> ℹ️ **Project Status**: Completed as a developer-mode test project. All functionality is implemented and working but requires business account verification to use external APIs like Meta/Facebook and WhatsApp in production.
 
-### Authentication System
-- 🔑 Token-based authentication with JWT
-- 🔄 Social media integration (Facebook OAuth2)
-- 🚪 Secure logout with token blacklisting
-- 🌍 IP-based access restrictions by country
-- 🔒 Password strength validation
-- ⏱️ Session management
+A scalable system for user authentication and multichannel communication built on Django and Next.js. It includes secure authentication mechanisms, social login, and messaging via WhatsApp and email.
+
+---
+
+## 📝 **About the Test Task**
+
+The task involved creating the following key components:
+1. WhatsApp API integration (Twilio/Meta Cloud API)
+2. Email sending system (Gmail/Office 365)
+3. Authentication system with:
+   - Token-based logout
+   - Facebook social login
+   - Country-based IP access restriction
+
+---
+
+## 🤔 **Challenges and Solutions**
+
+### WhatsApp Integration
+- Chose Meta Cloud API due to higher limits on the free tier.
+- Constraints in developer mode:
+  - 5 test numbers limit
+  - Custom messages only after user replies to a template.
+- Asynchronous message handling using Celery to prevent timeouts.
+- Implemented retry mechanisms for API errors.
+
+### Email Integration
+- Secure SMTP setup for Gmail/Office 365.
+- Queued processing for bulk email campaigns.
+- Gmail API limitations addressed with custom error handling.
+
+### Facebook Authentication
+- Limited functionality in Meta developer mode (requires app publishing).
+- Designed test scenarios and prepared documentation for app publishing.
+
+### General Authentication
+- Secure token blacklisting for logout.
+- Country-based access control using GeoIP2.
+- Token rotation and Redis optimization for scalability.
+
+### Security and Scalability
+- Secure token storage and session management.
+- Rate limiting and retry mechanisms to handle DDoS attacks.
+- Message queue optimization for high loads.
+
+---
+
+## 🌟 **Features**
+
+### Authentication
+- 🔑 JWT-based secure login.
+- 🔄 Social login (Facebook OAuth2).
+- 🚪 Safe logout with token invalidation.
+- 🌍 Country-based IP restrictions.
+- ⏱️ Session management.
 
 ### Communication Channels
-- 💬 WhatsApp Business API integration
-- 📧 Email system integration (Gmail/Office 365)
-- ⚡ Asynchronous message processing
-- 📊 Message delivery tracking
-- 🔄 Error handling and retry mechanisms
+- 💬 WhatsApp Business API integration.
+- 📧 Email sending via Gmail/Office 365.
+- ⚡ Asynchronous messaging.
+- 🔄 Retry mechanisms for API errors.
 
-## 🛠️ Tech Stack
+---
 
-### Backend (Django)
+## 🛠️ **Tech Stack**
+
+### Backend
 - Python 3.8+
-- Django REST Framework
-- PostgreSQL
-- Redis
-- Celery
+- Django 5.1.5 + DRF 3.15.2
+- PostgreSQL + Redis
+- Celery 5.4.0
 - JWT Authentication
 
-### Frontend (Next.js)
-- React 18+
+### Frontend
+- Next.js (App Router)
 - TypeScript
 - Tailwind CSS
-- Shadcn UI
-- Next.js 13+ (App Router)
+- shadcn/ui, lucide-react, motion
+- next-auth for authentication
 
-## 🚀 Getting Started
+---
 
-### Prerequisites
-```bash
-Python 3.8+
-Node.js 16+
-Redis Server
-PostgreSQL
-```
+## 🚀 **Getting Started**
 
 ### Backend Setup
+1. Clone the repository:
+   ```bash
+   git clone [[repository-url]](https://github.com/bulbashenko/message-sender.git)
+   cd backend
+   ```
 
-1. Clone the repository
-```bash
-git clone [[repository-url]](https://github.com/bulbashenko/message-sender.git)
-cd backend
-```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   ```
 
-2. Create and activate virtual environment
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. Install dependencies
-```bash
-pip install -r requirements.txt
-```
+4. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   ```
 
-4. Configure environment variables
-```bash
-cp .env.example .env
-# Edit .env with your configurations
-```
+5. Apply migrations:
+   ```bash
+   python manage.py migrate
+   ```
 
-Required environment variables:
-```env
-DEBUG=True
-REDIS_URL=redis://localhost:6379/0
-FACEBOOK_APP_ID=your-facebook-app-id
-FACEBOOK_APP_SECRET=your-facebook-app-secret
-```
+6. Start Redis (in a separate terminal):
+   ```bash
+   redis-server
+   ```
 
-5. Run migrations
-```bash
-python manage.py migrate
-```
+7. Start Celery worker:
+   ```bash
+   celery -A config worker -l info
+   ```
 
-6. Start development server
-```bash
-python manage.py runserver
-```
+8. Start the development server:
+   ```bash
+   python manage.py runserver
+   ```
 
 ### Frontend Setup
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
 
-1. Navigate to frontend directory
-```bash
-cd frontend
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-2. Install dependencies
-```bash
-npm install
-```
+3. Configure environment variables:
+   ```bash
+   cp .env.example .env.local
+   ```
 
-3. Configure environment variables
-```bash
-cp .env.example .env.local
-# Edit .env.local with your configurations
-```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+   
+---
 
-Required environment variables:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_FACEBOOK_APP_ID=your-facebook-app-id
-```
-
-4. Start development server
-```bash
-npm run dev
-```
-
-## 🏗️ Architecture
-
-### Backend Architecture
-The backend follows Clean Architecture principles and SOLID design patterns:
-
-#### Apps Structure
-```
-backend/
-├── apps/
-│   ├── authentication/    # User authentication
-│   ├── communications/    # Message handling
-│   └── core/             # Shared functionality
-└── config/               # Project configuration
-```
-
-### Frontend Architecture
-```
-frontend/
-├── app/                  # Next.js 13+ App Router
-│   ├── auth/            # Authentication pages
-│   ├── dashboard/       # User dashboard
-│   └── components/      # Reusable components
-├── lib/                 # Utilities and helpers
-└── public/              # Static assets
-```
-
-## 🔒 Security Features
-
-- JWT token management
-- CSRF protection
-- Rate limiting
-- Input validation
-- Secure password handling
-- Session security
-- IP-based restrictions
-
-## 🚦 Development Workflow
-
-1. Create a new branch for your feature
-```bash
-git checkout -b feature/your-feature-name
-```
-
-2. Make your changes and commit using conventional commits
-```bash
-git commit -m "feat: add new feature"
-git commit -m "fix: resolve bug issue"
-```
-
-3. Push changes and create a pull request
-```bash
-git push origin feature/your-feature-name
-```
-
-## 🐛 Troubleshooting
+## 🐛 **Troubleshooting**
 
 ### Common Issues
 
 1. **Redis Connection Error**
-```bash
-# Ensure Redis is running
-redis-cli ping  # Should return PONG
-```
+   ```bash
+   # Ensure Redis is running
+   redis-cli ping  # Should return PONG
+   ```
 
 2. **Database Migration Issues**
-```bash
-# Reset migrations
-python manage.py migrate --fake authentication zero
-python manage.py migrate authentication
-```
+   If you encounter migration errors, follow these steps:
 
-3. **Frontend API Connection Issues**
-- Check if backend server is running
-- Verify environment variables
-- Check CORS settings in backend
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes using conventional commits
-4. Push to your branch
-5. Create a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 💬 Support
-
-For support and questions:
-- 📚 Review [documentation](docs/)
-- 🐛 Check [issue tracker](issues/)
-- 📧 Contact development team
+   ```bash
+   # Reset and reapply migrations for specific apps
+   python manage.py makemigrations authentication communications
+   python manage.py migrate authentication communications
+   python manage.py migrate
+   ```
 
 ---
 
-<div align="center">
-Built with ❤️ using Django, Next.js, and modern web technologies.
+Теперь этот раздел включает шаги для исправления проблем с миграциями. Если еще что-то нужно уточнить или дополнить, дай знать!
 
-![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
-![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-</div>
+## 🔒 **Security Features**
+
+- JWT-based authentication
+- CSRF protection
+- Rate limiting
+- Data validation
+- Password security
+- Session management
+- IP-based restrictions
+
+---
+
+## 📄 **License**
+Distributed under the MIT License. See the [LICENSE](LICENSE) file for more information.
