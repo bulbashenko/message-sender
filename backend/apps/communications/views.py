@@ -23,30 +23,20 @@ class MessageHistoryPagination(PageNumberPagination):
 class MessageHistoryView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = MessageHistoryPagination
-    """
-    API endpoint for retrieving user's message history.
-    Supports filtering by message type and pagination.
-    """
     def get(self, request):
-        # Get message type filter from query params
         message_type = request.query_params.get('type')
         
-        # Base queryset for user's messages
         queryset = Communication.objects.filter(user=request.user)
         
-        # Apply type filter if provided
         if message_type in [Communication.EMAIL, Communication.WHATSAPP]:
             queryset = queryset.filter(type=message_type)
             
-        # Order by created_at descending (newest first)
         queryset = queryset.order_by('-created_at')
         
-        # Apply pagination
         paginator = self.pagination_class()
         paginator.request = request
         page = paginator.paginate_queryset(queryset, request, view=self)
         
-        # Serialize the page
         serializer = CommunicationHistorySerializer(page, many=True)
         
         return paginator.get_paginated_response(serializer.data)
@@ -55,10 +45,6 @@ class MessageHistoryView(APIView):
 @permission_classes([permissions.IsAuthenticated])
 class WhatsAppView(APIView):
     throttle_classes = [WhatsAppRateThrottle]
-    """
-    API endpoint for sending WhatsApp messages.
-    Messages are processed asynchronously and stored in message history.
-    """
     def post(self, request):
         serializer = WhatsAppMessageSerializer(data=request.data)
         if not serializer.is_valid():
@@ -67,7 +53,6 @@ class WhatsAppView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
-        # Create communication record immediately
         comm = Communication.objects.create(
             user=request.user,
             type=Communication.WHATSAPP,
@@ -76,7 +61,6 @@ class WhatsAppView(APIView):
             content=serializer.validated_data.get("message", "hello_world template")
         )
         
-        # Start async task with record ID
         task_kwargs = {
             'to_number': serializer.validated_data["to"],
             'message_type': serializer.validated_data["message_type"],
@@ -84,7 +68,6 @@ class WhatsAppView(APIView):
             'comm_id': comm.id
         }
         
-        # Only include message for text type
         if serializer.validated_data["message_type"] == "text":
             task_kwargs['message'] = serializer.validated_data["message"]
         
@@ -105,10 +88,6 @@ class WhatsAppView(APIView):
 @permission_classes([permissions.IsAuthenticated])
 class EmailView(APIView):
     throttle_classes = [EmailRateThrottle]
-    """
-    API endpoint for sending email messages.
-    Messages are processed asynchronously and stored in message history.
-    """
     def post(self, request):
         serializer = EmailMessageSerializer(data=request.data)
         if not serializer.is_valid():
@@ -117,7 +96,6 @@ class EmailView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         
-        # Create communication record immediately
         comm = Communication.objects.create(
             user=request.user,
             type=Communication.EMAIL,
@@ -127,7 +105,6 @@ class EmailView(APIView):
             content=serializer.validated_data["message"]
         )
         
-        # Start async task with record ID
         task = send_email_async.apply_async(kwargs={
             'to_email': serializer.validated_data["to"],
             'subject': serializer.validated_data["subject"],

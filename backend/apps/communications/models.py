@@ -14,7 +14,6 @@ class Communication(models.Model):
         related_name='communications'
     )
 
-    # Communication type constants
     EMAIL = "email"
     WHATSAPP = "whatsapp"
 
@@ -37,14 +36,13 @@ class Communication(models.Model):
     error_message = models.TextField(blank=True, null=True)
     whatsapp_message_id = models.CharField(max_length=100, blank=True, null=True)
 
-    # Timestamp fields for tracking message lifecycle
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     sent_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         app_label = "communications"
-        ordering = ['-created_at']  # Show newest messages first
+        ordering = ['-created_at']
 
     def __str__(self):
         if self.type == "email":
