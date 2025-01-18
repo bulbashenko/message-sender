@@ -1,11 +1,13 @@
 from django.urls import path
-from .views import EmailView, WhatsAppView
+from .views import EmailView, WhatsAppView, MessageHistoryView
 
 app_name = "communications"
 
 urlpatterns = [
-    path("email/", EmailView.as_view(), name="email-list"),
-    path("email/send/", EmailView.as_view(), name="email-send"),
-    path("whatsapp/", WhatsAppView.as_view(), name="whatsapp-list"),
-    path("whatsapp/send/", WhatsAppView.as_view(), name="whatsapp-send"),
+    # Message history endpoint
+    path("history/", MessageHistoryView.as_view(), name="message-history"),
+    
+    # Messaging endpoints
+    path("email/", EmailView.as_view(), name="email-send"),
+    path("whatsapp/", WhatsAppView.as_view(), name="whatsapp-send"),
 ]

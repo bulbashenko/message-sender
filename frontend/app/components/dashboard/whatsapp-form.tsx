@@ -24,7 +24,16 @@ const whatsappSchema = z.object({
   to: z.string()
     .min(10, 'Phone number must be at least 10 digits')
     .regex(/^\+/, 'Phone number must start with + and country code'),
-  message: z.string().min(1, 'Message is required'),
+  messageType: z.enum(['template', 'text']),
+  message: z.string().optional(),
+}).refine((data) => {
+  if (data.messageType === 'text' && !data.message) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Message is required for text messages",
+  path: ["message"]
 });
 
 type WhatsAppFormValues = z.infer<typeof whatsappSchema>;
@@ -37,21 +46,27 @@ export function WhatsAppForm() {
     resolver: zodResolver(whatsappSchema),
     defaultValues: {
       to: '',
+      messageType: 'template',
       message: '',
     },
   });
+
+  const messageType = form.watch('messageType');
 
   const onSubmit = async (values: WhatsAppFormValues) => {
     try {
       setIsLoading(true);
       const headers = await getAuthHeaders();
+      const payload = {
+        to: values.to,
+        message_type: values.messageType,
+        ...(values.messageType === 'text' && { message: values.message }),
+      };
+      
       const response = await fetch(endpoints.whatsapp.send, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          to: values.to,
-          message: values.message,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -111,6 +126,43 @@ export function WhatsAppForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
+                name="messageType"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="text-gray-700 font-medium">Message Type</FormLabel>
+                    <div className="flex flex-col space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          {...field}
+                          value="template"
+                          checked={field.value === 'template'}
+                          className="w-4 h-4 text-green-600"
+                        />
+                        <span>First Message (Template)</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          {...field}
+                          value="text"
+                          checked={field.value === 'text'}
+                          className="w-4 h-4 text-green-600"
+                        />
+                        <span>Regular Message</span>
+                      </label>
+                    </div>
+                    {field.value === 'text' && (
+                      <p className="text-amber-600 text-sm bg-amber-50 p-2 rounded border border-amber-200">
+                        Note: Regular messages will only be delivered if the recipient has previously responded to a template message.
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="to"
                 render={({ field }) => (
                   <FormItem>
@@ -142,39 +194,41 @@ export function WhatsAppForm() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">Message</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Textarea 
-                          placeholder="Type your message here"
-                          className="min-h-[100px] pl-10 bg-white/70 focus:bg-white transition-colors duration-200"
-                          {...field}
-                        />
-                        <svg
-                          className="w-5 h-5 text-gray-400 absolute left-3 top-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+              {messageType === 'text' && (
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">Message</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Textarea 
+                            placeholder="Type your message here"
+                            className="min-h-[100px] pl-10 bg-white/70 focus:bg-white transition-colors duration-200"
+                            {...field}
                           />
-                        </svg>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                          <svg
+                            className="w-5 h-5 text-gray-400 absolute left-3 top-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                            />
+                          </svg>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all duration-200"

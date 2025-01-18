@@ -1,19 +1,9 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { WhatsAppForm } from '@/app/components/dashboard/whatsapp-form';
 import { EmailForm } from '@/app/components/dashboard/email-form';
-import { motion } from 'framer-motion';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-      delayChildren: 0.3
-    }
-  }
-};
+import { MessageHistory } from '@/app/components/dashboard/message-history';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -24,6 +14,17 @@ const itemVariants = {
       type: "spring",
       stiffness: 100,
       damping: 15
+    }
+  }
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+      delayChildren: 0.3
     }
   }
 };
@@ -114,6 +115,19 @@ export default function DashboardPage() {
               <EmailForm />
             </div>
           </motion.div>
+        </motion.div>
+
+        {/* Message History Section */}
+        <motion.div
+          variants={itemVariants}
+          initial="hidden"
+          animate="show"
+          className="w-full group"
+        >
+          <div className="transform-gpu transition-all duration-300 ease-out group-hover:translate-y-[-4px] group-hover:shadow-xl relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <MessageHistory />
+          </div>
         </motion.div>
       </div>
     </div>

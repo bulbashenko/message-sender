@@ -5,21 +5,11 @@ from django.utils import timezone
 from .models import Communication
 
 
-def send_whatsapp_message(to_number: str, message: str, user) -> dict:
+def send_whatsapp_message(to_number: str, message: str = None, message_type: str = "text", user = None) -> dict:
     """
     Send WhatsApp message and return delivery status.
-    No message history is maintained - records are deleted after delivery attempt.
+    Supports both template and text messages.
     """
-    comm = Communication(
-        type="whatsapp",
-        recipient=to_number,
-        content=message,
-        status="pending",
-        user=user
-    )
-    comm.save()
-
-    result = {}
     try:
         url = f"https://graph.facebook.com/v21.0/{settings.WHATSAPP_PHONE_NUMBER_ID}/messages"
         headers = {
@@ -27,15 +17,28 @@ def send_whatsapp_message(to_number: str, message: str, user) -> dict:
             "Content-Type": "application/json",
         }
 
-        data = {
-            "messaging_product": "whatsapp",
-            "recipient_type": "individual",
-            "to": to_number,
-            "type": "text",
-            "text": {
-                "body": message
+        if message_type == "template":
+            data = {
+                "messaging_product": "whatsapp",
+                "to": to_number,
+                "type": "template",
+                "template": {
+                    "name": "hello_world",
+                    "language": {
+                        "code": "en_US"
+                    }
+                }
             }
-        }
+        else:
+            data = {
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": to_number,
+                "type": "text",
+                "text": {
+                    "body": message
+                }
+            }
 
         response = requests.post(url, headers=headers, json=data)
         response_data = response.json()
@@ -58,27 +61,14 @@ def send_whatsapp_message(to_number: str, message: str, user) -> dict:
             "error": str(e)
         }
 
-    # Delete the communication record as we don't maintain history
-    comm.delete()
+
     return result
 
 
 def send_email_message(to_email: str, subject: str, message: str, user) -> dict:
     """
     Send email message and return delivery status.
-    No message history is maintained - records are deleted after delivery attempt.
     """
-    comm = Communication(
-        type="email",
-        recipient=to_email,
-        subject=subject,
-        content=message,
-        status="pending",
-        user=user
-    )
-    comm.save()
-
-    result = {}
     try:
         send_mail(
             subject=subject,
@@ -95,6 +85,5 @@ def send_email_message(to_email: str, subject: str, message: str, user) -> dict:
             "error": str(e)
         }
 
-    # Delete the communication record as we don't maintain history
-    comm.delete()
+
     return result

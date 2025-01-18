@@ -10,11 +10,14 @@ export const endpoints = {
 
   // Communications endpoints
   whatsapp: {
-    send: `${API_URL}/api/communications/whatsapp/send/`,
+    send: `${API_URL}/api/communications/whatsapp/`,
     list: `${API_URL}/api/communications/whatsapp/`,
   },
   email: {
-    send: `${API_URL}/api/communications/email/send/`,
+    send: `${API_URL}/api/communications/email/`,
     list: `${API_URL}/api/communications/email/`,
+  },
+  communications: {
+    history: `${API_URL}/api/communications/history/`,
   },
 } as const;

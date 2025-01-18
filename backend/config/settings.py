@@ -111,6 +111,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "user": "1000/day",  # Default user rate
+        "email_send": "100/day",  # Limit for email sending
+        "whatsapp_send": "50/day",  # Limit for WhatsApp sending
+    },
 }
 
 SIMPLE_JWT = {
