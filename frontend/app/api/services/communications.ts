@@ -1,7 +1,11 @@
 // app/api/services/communications.ts
+"use server"
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = process.env.BASE_BACKEND_URL;
+if (!BASE_URL) {
+  throw new Error("BASE_BACKEND_URL is not defined in the environment variables");
+}
 
 export async function sendEmail(
   accessToken: string,

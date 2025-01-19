@@ -1,7 +1,7 @@
 // app/api/services/auth.ts
 import axios, { AxiosError } from "axios";
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = process.env.BASE_BACKEND_URL;
 
 export interface AuthResponse {
   id: string;
@@ -10,13 +10,6 @@ export interface AuthResponse {
   email: string;
 }
 
-/**
- * Логин через ваш внешний бэкенд (POST /api/auth/login/).
- * Возвращает объект user для NextAuth, либо null, если логин не удался.
- * Важный момент:
- *  - Внешний запрос происходит на сервере Next.js, потому вы не увидите
- *    "http://localhost:8000/api/auth/login/" в вкладке Network на клиенте.
- */
 export async function authLogin(email: string, password: string) {
   try {
     // Тип ожидаемого ответа (можно расширить, если у вас ещё какие-то поля)
@@ -89,15 +82,16 @@ export async function authRegister(email: string, password: string) {
  * Логаут (POST /api/auth/logout/).
  * Деактивирует refresh-токен на бэкенде.
  */
-export async function authLogout(refreshToken: string) {
+export async function authLogout(refreshToken: string, accessToken: string) {
   try {
     const res = await axios.post(
       `${BASE_URL}/api/auth/logout/`,
-      { refresh: refreshToken },
       {
-        // согласно вашей доке, для logout передаём refresh-токен в заголовке
+        refresh: refreshToken,
+      },
+      {
         headers: {
-          Authorization: `Bearer ${refreshToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       },
     );

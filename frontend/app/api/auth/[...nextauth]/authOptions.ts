@@ -1,7 +1,9 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { AuthOptions } from "next-auth";
-import { authLogin } from "../../services/auth"; // Обновите путь, если необходимо
+import { authLogin, authLoginFacebook, authLogout } from "../../services/auth";
 import { DefaultSession } from "next-auth";
+import FacebookProvider from "next-auth/providers/facebook"; // Импорт FacebookProvider
+
 
 declare module "next-auth" {
   interface Session {
@@ -16,11 +18,28 @@ declare module "next-auth" {
     access?: string;
     refresh?: string;
   }
+
+  interface JWT {
+    access?: string;
+    refresh?: string;
+    id?: string;
+  }
 }
 
 export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
+  },
+  events: {
+    async signOut({ token }) {
+      if (token?.refresh && token?.access) {
+        try {
+          await authLogout(token.refresh as string, token.access as string);
+        } catch (error) {
+          console.error("Error during logout:", error);
+        }
+      }
+    },
   },
   providers: [
     CredentialsProvider({
@@ -34,15 +53,11 @@ export const authOptions: AuthOptions = {
           throw new Error("Email и пароль требуются");
         }
 
-        // authLogin обращается к внешнему сервису (http://localhost:8000/api/auth/login/)
         const data = await authLogin(credentials.email, credentials.password);
-        // Если успех, вернётся объект с токенами
         if (!data) {
-          // Если нет, падаем с ошибкой
           throw new Error("Неверные учётные данные");
         }
 
-        // Возвращаем объект с нужными данными
         return {
           id: data.id,
           access: data.access,
@@ -51,19 +66,50 @@ export const authOptions: AuthOptions = {
         };
       },
     }),
+    // Добавляем FacebookProvider
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID as string,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
+      authorization: {
+        params: {
+          scope: "email,public_profile", // Запрашиваемые разрешения
+          // Можно добавить другие параметры, если необходимо
+        },
+      },
+    }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      // При логине добавляем user данные в токен
+    async jwt({ token, user, account }) {
       if (user) {
         token.access = user.access;
         token.refresh = user.refresh;
         token.id = user.id;
       }
+
+      // Если пользователь авторизовался через Facebook
+      if (account && account.provider === "facebook") {
+        try {
+          // Получаем access_token от Facebook
+          const facebookAccessToken = account.access_token as string;
+          const redirect_uri = process.env.FACEBOOK_REDIRECT_URI as string;
+
+          // Отправляем access_token на ваш бэкенд для обмена на токены вашего приложения
+          const authData = await authLoginFacebook(facebookAccessToken, redirect_uri);
+
+          if (authData) {
+            token.access = authData.access;
+            token.refresh = authData.refresh;
+            token.id = authData.id;
+            // Можно добавить email, если необходимо
+            token.email = authData.email;
+          }
+        } catch (error) {
+          console.error("Error during Facebook login:", error);
+        }
+      }
       return token;
     },
     async session({ session, token }) {
-      // Прокидываем нужные данные из токена в session
       if (token?.access) {
         session.user = {
           ...session.user,
@@ -76,6 +122,6 @@ export const authOptions: AuthOptions = {
     },
   },
   pages: {
-    signIn: "/login", // Страница логина
+    signIn: "/login",
   },
 };
