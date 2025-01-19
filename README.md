@@ -144,6 +144,8 @@ The task involved creating the following key components:
 2. Install dependencies:
    ```bash
    npm install
+   # or
+   pnpm install
    ```
 
 3. Configure environment variables:
@@ -154,6 +156,8 @@ The task involved creating the following key components:
 4. Start the development server:
    ```bash
    npm run dev
+   #or
+   pnpm dev
    ```
    
 ---
@@ -174,13 +178,11 @@ The task involved creating the following key components:
    ```bash
    # Reset and reapply migrations for specific apps
    python manage.py makemigrations authentication communications
-   python manage.py migrate authentication communications
    python manage.py migrate
    ```
 
 ---
 
-Теперь этот раздел включает шаги для исправления проблем с миграциями. Если еще что-то нужно уточнить или дополнить, дай знать!
 
 ## 🔒 **Security Features**
 
