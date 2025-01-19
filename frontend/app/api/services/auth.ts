@@ -1,4 +1,5 @@
 // app/api/services/auth.ts
+"use server"
 import axios, { AxiosError } from "axios";
 
 const BASE_URL = process.env.BASE_BACKEND_URL;
