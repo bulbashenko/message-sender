@@ -75,11 +75,101 @@ The task involved creating the following key components:
 ## 🛠️ **Tech Stack**
 
 ### Backend
+
+#### Core Technologies
 - Python 3.8+
-- Django 5.1.5 + DRF 3.15.2
-- PostgreSQL + Redis
-- Celery 5.4.0
-- JWT Authentication
+- Django 5.1.5 + Django REST Framework 3.15.2
+- PostgreSQL (Database) + Redis (Caching & Queue)
+- Celery 5.4.0 (Async Task Processing)
+- JWT Authentication with Token Blacklisting
+
+#### Project Structure
+```
+backend/
+├── apps/
+│   ├── authentication/    # User auth, social login, token management
+│   ├── communications/   # Message handling, WhatsApp/Email integration
+│   └── core/            # Shared utilities and base classes
+├── config/              # Project settings and configuration
+└── requirements.txt     # Project dependencies
+```
+
+#### Key Components
+1. **Authentication System**
+   - JWT-based authentication with token rotation
+   - Social authentication (Facebook OAuth2)
+   - IP-based access control using GeoIP2
+   - Token blacklisting for secure logout
+
+2. **Communications Module**
+   - WhatsApp message handling via Meta Cloud API
+   - Email integration with Gmail/Office 365
+   - Asynchronous message processing
+   - Rate limiting and retry mechanisms
+
+3. **Task Queue System**
+   - Celery for asynchronous task processing
+   - Redis as message broker
+   - Scheduled tasks with django-celery-beat
+   - Error handling and retry mechanisms
+
+#### Key Dependencies
+- djangorestframework-simplejwt (5.4.0): JWT authentication
+- social-auth-app-django (5.4.2): Social authentication
+- celery (5.4.0): Asynchronous task processing
+- redis (5.2.1): Caching and message broker
+- psycopg2-binary (2.9.10): PostgreSQL adapter
+- django-cors-headers (4.6.0): CORS support
+- python-dotenv (1.0.1): Environment configuration
+
+#### Development Environment
+
+1. **System Requirements**
+   - Python 3.8 or higher
+   - SQLite3
+   - Redis 5+
+   - Git
+
+2. **IDE Recommendations**
+   - VSCode with Python extension
+   - PyCharm (Community or Professional)
+
+3. **Environment Variables**
+   ```
+   # Database
+   DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+   
+   # Redis
+   REDIS_URL=redis://localhost:6379/0
+   
+   # JWT Settings
+   JWT_SECRET_KEY=your-secret-key
+   JWT_ACCESS_TOKEN_LIFETIME=5
+   JWT_REFRESH_TOKEN_LIFETIME=1440
+   
+   # Social Auth
+   FACEBOOK_APP_ID=your-app-id
+   FACEBOOK_APP_SECRET=your-app-secret
+   
+   # Communications
+   WHATSAPP_API_TOKEN=your-whatsapp-token
+   WHATSAPP_PHONE_NUMBER=your-whatsapp-number
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_HOST_USER=your-email
+   EMAIL_HOST_PASSWORD=your-app-password
+   ```
+
+4. **Development Tools**
+   - Black: Code formatting
+   - Flake8: Code linting
+   - pytest: Testing framework
+   - django-debug-toolbar: Development debugging
+
+5. **API Documentation**
+   - Available at `/api/docs/` when running in development mode
+   - Swagger UI for interactive API testing
+   - Detailed endpoint documentation with request/response examples
 
 ### Frontend
 - Next.js (App Router)
