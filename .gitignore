@@ -1,0 +1,100 @@
+# Backend (Django)
+/backend/.env
+/backend/.env.*
+!/backend/.env.example
+/backend/db.sqlite3
+/backend/*.log
+/backend/django.log
+/backend/whatsapp_test.py
+/backend/smtp_test.py
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+**/*.egg
+**/*.egg-info
+**/dist/
+**/build/
+**/.eggs/
+**/.Python
+**/pip-log.txt
+
+# Django migrations
+**/migrations/*.py
+!**/migrations/__init__.py
+
+# Virtual Environment
+/backend/venv/
+/backend/.venv/
+/backend/env/
+.python-version
+
+# Django media and static
+/backend/media/
+/backend/static/
+/backend/staticfiles/
+
+# Celery
+/backend/celerybeat-schedule
+/backend/celerybeat.pid
+/backend/*.pid
+
+# Frontend (Next.js)
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+/frontend/build/
+/frontend/.vercel/
+/frontend/coverage/
+/frontend/.nyc_output/
+
+# Frontend env files
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.development.local
+/frontend/.env.test.local
+/frontend/.env.production.local
+
+# Frontend logs
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/.pnpm-debug.log*
+
+# TypeScript
+
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+
+# Package managers
+/frontend/yarn.lock
+/frontend/package-lock.json
+/frontend/pnpm-lock.yaml
+!/frontend/pnpm-lock.yaml  # Раскомментируйте, если хотите сохранять pnpm-lock
+
+# Cache
+/frontend/.eslintcache
+.cache
+**/.temрdir
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+/frontend/coverage/
+/frontend/.nyc_output/
+/backend/.coverage
+/backend/htmlcov/
+/backend/.pytest_cache/
+/backend/pytest.xml
+/backend/.tox/
+
+/backend/.git/
+/frontend/.git/
