@@ -16,67 +16,33 @@ type MessageHistoryEntry = {
   type: "email" | "whatsapp";
   timestamp: Date;
   recipient: string;
-  subject?: string; // Only for email
+  subject?: string; // Только для email
   message: string;
   response: string;
 };
 
 export default function DashboardClient() {
+  // Вызываем хуки всегда, в одном и том же порядке
   const { data: session, status } = useSession();
-
-  // Email state
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-
-  // WhatsApp state
   const [phone, setPhone] = useState("");
   const [whatsAppMessage, setWhatsAppMessage] = useState("");
-
-  // Достаём токен
-  const userAccessToken = session?.user?.access;
-
-  // Toast для уведомлений
-  const { toast } = useToast();
-
-  // История отправленных сообщений
   const [messageHistory, setMessageHistory] = useState<MessageHistoryEntry[]>(
     [],
   );
+  const { toast } = useToast();
 
-  // Генерация уникального ID для записей истории
+  // После вызова всех хуков можно условно рендерить контент
+  if (status === "loading") {
+    return null; // или покажи спиннер, если нужно
+  }
+
+  const userAccessToken = session?.user?.access;
   const generateId = () => Date.now() + Math.random();
 
-  // Если сессия в процессе загрузки
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-xl text-gray-700 dark:text-gray-300">
-          Loading...
-        </div>
-      </div>
-    );
-  }
-
-  // Если пользователь не залогинен
-  if (!session) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-xl text-gray-700 dark:text-gray-300">
-          Access Denied
-        </div>
-      </div>
-    );
-  }
-
-  // Отправка email
   async function handleSendEmail() {
-    console.log("handleSendEmail: clicked!");
-    console.log("access token:", userAccessToken);
-    if (!userAccessToken) {
-      console.warn("No access token - skip request");
-      return;
-    }
     if (!userAccessToken) return;
     try {
       const res = await sendEmail(userAccessToken, email, subject, message);
@@ -86,7 +52,6 @@ export default function DashboardClient() {
         description: `Response: ${JSON.stringify(res)}`,
       });
 
-      // Добавляем запись в историю
       const newEntry: MessageHistoryEntry = {
         id: generateId(),
         type: "email",
@@ -98,7 +63,6 @@ export default function DashboardClient() {
       };
       setMessageHistory((prev) => [newEntry, ...prev]);
 
-      // Очищаем поля
       setEmail("");
       setSubject("");
       setMessage("");
@@ -117,7 +81,6 @@ export default function DashboardClient() {
     }
   }
 
-  // Отправка WhatsApp
   async function handleSendWhatsApp() {
     if (!userAccessToken) return;
     try {
@@ -128,7 +91,6 @@ export default function DashboardClient() {
         description: `Response: ${JSON.stringify(res)}`,
       });
 
-      // Добавляем запись в историю
       const newEntry: MessageHistoryEntry = {
         id: generateId(),
         type: "whatsapp",
@@ -139,7 +101,6 @@ export default function DashboardClient() {
       };
       setMessageHistory((prev) => [newEntry, ...prev]);
 
-      // Очищаем поля
       setPhone("");
       setWhatsAppMessage("");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

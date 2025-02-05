@@ -43,7 +43,7 @@ export default function LoginPage() {
         title: "Login Successful",
         description: "You have successfully logged in.",
       });
-      router.push("/dashboard");
+      router.push("/dashboard/sender");
     }
   }
 

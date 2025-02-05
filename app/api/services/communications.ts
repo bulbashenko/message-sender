@@ -148,12 +148,12 @@ export async function searchBusinesses(
       },
     },
   );
-  
+
   // The backend returns { status: "success", businesses: [...] } or { status: "error", error: "..." }
   if (res.data.status === "error") {
     throw new Error(res.data.error);
   }
-  
+
   return res.data.businesses || [];
 }
 

@@ -31,7 +31,7 @@ const DashboardHeader: React.FC = () => {
             </span>
             <nav className="hidden md:flex space-x-4">
               <a
-                href="/dashboard"
+                href="/dashboard/sender"
                 className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Dashboard
@@ -83,7 +83,7 @@ const DashboardHeader: React.FC = () => {
       <div className="md:hidden border-t border-gray-200 dark:border-gray-700 px-4 py-2">
         <nav className="flex flex-col space-y-2">
           <a
-            href="/dashboard"
+            href="/dashboard/sender"
             className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium"
           >
             Dashboard

@@ -56,6 +56,21 @@ export const authOptions: AuthOptions = {
         console.log("=== CredentialsProvider.authorize ===");
         console.log("credentials:", credentials);
 
+        //!!! REMOVE THIS BLOCK IN PRODUCTION
+        if (
+          credentials?.email === "test@test.com" &&
+          credentials?.password === "test"
+        ) {
+          console.log("Вход с тестовыми данными");
+          return {
+            id: "test-user",
+            email: credentials.email,
+            access: "test-access-token",
+            refresh: "test-refresh-token",
+          };
+        }
+        //!!! REMOVE THIS BLOCK IN PRODUCTION
+
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email и пароль требуются");
         }

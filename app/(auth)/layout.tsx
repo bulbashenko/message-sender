@@ -13,7 +13,7 @@ export default async function AuthLayout({
 
   if (session) {
     // Если юзер уже залогинился → на дашборд
-    redirect("/dashboard");
+    redirect("/dashboard/sender");
   }
 
   // Если не залогинен — показываем страницы (login или register)

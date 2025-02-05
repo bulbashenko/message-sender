@@ -17,14 +17,15 @@ import { Input } from "@/components/ui/input";
 import { Search, PlusCircle, XCircle, Building, MapPin } from "lucide-react";
 
 export default function BusinessesPage() {
-  // Все хуки вызываются всегда, без условий
   const { data: session, status } = useSession();
   const { toast } = useToast();
 
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [newBusiness, setNewBusiness] = useState({
     name: "",
@@ -35,7 +36,11 @@ export default function BusinessesPage() {
     google_maps_link: "",
   });
 
-  // useEffect для редиректа – вызывается всегда
+  console.log("===== BusinessesPage RENDER =====");
+  console.log("session =", session);
+  console.log("status =", status);
+
+  // Если пользователь не аутентифицирован — редиректим
   useEffect(() => {
     if (status === "unauthenticated") {
       console.log("Пользователь не аутентифицирован, редиректим на /login");
@@ -43,6 +48,7 @@ export default function BusinessesPage() {
     }
   }, [status]);
 
+  // Загрузка всех бизнесов
   const loadBusinesses = useCallback(async () => {
     try {
       setLoading(true);
@@ -64,7 +70,7 @@ export default function BusinessesPage() {
     }
   }, [session, toast]);
 
-  // useEffect для загрузки бизнесов при наличии токена
+  // При монтировании и при наличии токена грузим бизнесы
   useEffect(() => {
     if (status === "authenticated" && session?.user?.access) {
       console.log(
@@ -79,6 +85,7 @@ export default function BusinessesPage() {
     }
   }, [status, session, loadBusinesses]);
 
+  // Обработка поиска
   async function handleSearch() {
     console.log("=== Нажали на Search ===");
     console.log("session?.user.access =", session?.user?.access);
@@ -136,6 +143,7 @@ export default function BusinessesPage() {
     }
   }
 
+  // Обработка добавления нового бизнеса
   async function handleAddBusiness(e: React.FormEvent) {
     e.preventDefault();
     console.log("=== handleAddBusiness ===");
@@ -191,7 +199,6 @@ export default function BusinessesPage() {
     }
   }
 
-  // В условном рендере уже отображаем индикатор загрузки, если status === "loading"
   return (
     <motion.div
       className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8"
@@ -199,201 +206,195 @@ export default function BusinessesPage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {status === "loading" ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <p className="text-xl text-gray-700 dark:text-gray-300">Loading...</p>
-        </div>
-      ) : (
-        <div className="max-w-7xl mx-auto">
-          {/* Заголовок и кнопка "Add Business" */}
-          <header className="mb-8 flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
-              Businesses
-            </h1>
-            <Button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="flex items-center space-x-2"
-            >
-              {showAddForm ? (
-                <>
-                  <XCircle className="w-4 h-4" />
-                  <span>Cancel</span>
-                </>
-              ) : (
-                <>
-                  <PlusCircle className="w-4 h-4" />
-                  <span>Add Business</span>
-                </>
-              )}
-            </Button>
-          </header>
+      <div className="max-w-7xl mx-auto">
+        {/* Заголовок и кнопка "Add Business" */}
+        <header className="mb-8 flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">
+            Businesses
+          </h1>
+          <Button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="flex items-center space-x-2"
+          >
+            {showAddForm ? (
+              <>
+                <XCircle className="w-4 h-4" />
+                <span>Cancel</span>
+              </>
+            ) : (
+              <>
+                <PlusCircle className="w-4 h-4" />
+                <span>Add Business</span>
+              </>
+            )}
+          </Button>
+        </header>
 
-          {/* Карточка поиска */}
+        {/* Карточка поиска */}
+        <Card className="p-6 mb-8 shadow-lg bg-white dark:bg-gray-800">
+          <div className="flex items-center mb-4 space-x-2">
+            <Search className="w-5 h-5 text-blue-500" />
+            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+              Search Businesses
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Search Query
+              </label>
+              <Input
+                placeholder='e.g. "coffee shop"'
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Location
+              </label>
+              <Input
+                placeholder='e.g. "New York"'
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <Button
+            onClick={handleSearch}
+            disabled={loading}
+            className="mt-2 flex items-center space-x-2"
+          >
+            <Search className="w-4 h-4" />
+            <span>Search</span>
+          </Button>
+        </Card>
+
+        {/* Форма добавления нового бизнеса */}
+        {showAddForm && (
           <Card className="p-6 mb-8 shadow-lg bg-white dark:bg-gray-800">
             <div className="flex items-center mb-4 space-x-2">
-              <Search className="w-5 h-5 text-blue-500" />
+              <PlusCircle className="w-5 h-5 text-green-500" />
               <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                Search Businesses
+                Add New Business
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <form onSubmit={handleAddBusiness} className="space-y-4">
+              {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Search Query
+                  Business Name *
                 </label>
                 <Input
-                  placeholder='e.g. "coffee shop"'
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Business Name"
+                  value={newBusiness.name}
+                  onChange={(e) =>
+                    setNewBusiness({ ...newBusiness, name: e.target.value })
+                  }
                   className="mt-1"
                 />
               </div>
+              {/* Address */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Location
+                  Address *
                 </label>
                 <Input
-                  placeholder='e.g. "New York"'
-                  value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
+                  placeholder="Street 123, City, etc."
+                  value={newBusiness.address}
+                  onChange={(e) =>
+                    setNewBusiness({ ...newBusiness, address: e.target.value })
+                  }
                   className="mt-1"
                 />
               </div>
-            </div>
-            <Button
-              onClick={handleSearch}
-              disabled={loading}
-              className="mt-2 flex items-center space-x-2"
-            >
-              <Search className="w-4 h-4" />
-              <span>Search</span>
-            </Button>
+              {/* Phone Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Phone Number *
+                </label>
+                <Input
+                  placeholder="+1234567890"
+                  value={newBusiness.phone_number}
+                  onChange={(e) =>
+                    setNewBusiness({
+                      ...newBusiness,
+                      phone_number: e.target.value,
+                    })
+                  }
+                  className="mt-1"
+                />
+              </div>
+              {/* Website */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Website
+                </label>
+                <Input
+                  placeholder="https://example.com"
+                  value={newBusiness.website}
+                  onChange={(e) =>
+                    setNewBusiness({ ...newBusiness, website: e.target.value })
+                  }
+                  className="mt-1"
+                />
+              </div>
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Category
+                </label>
+                <Input
+                  placeholder="e.g. Cafe, Store, etc."
+                  value={newBusiness.category}
+                  onChange={(e) =>
+                    setNewBusiness({
+                      ...newBusiness,
+                      category: e.target.value,
+                    })
+                  }
+                  className="mt-1"
+                />
+              </div>
+              {/* Google Maps Link */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Google Maps Link
+                </label>
+                <Input
+                  placeholder="https://maps.google.com/..."
+                  value={newBusiness.google_maps_link}
+                  onChange={(e) =>
+                    setNewBusiness({
+                      ...newBusiness,
+                      google_maps_link: e.target.value,
+                    })
+                  }
+                  className="mt-1"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="flex items-center space-x-2"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Add Business</span>
+              </Button>
+            </form>
           </Card>
+        )}
 
-          {/* Форма добавления нового бизнеса */}
-          {showAddForm && (
-            <Card className="p-6 mb-8 shadow-lg bg-white dark:bg-gray-800">
-              <div className="flex items-center mb-4 space-x-2">
-                <PlusCircle className="w-5 h-5 text-green-500" />
-                <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
-                  Add New Business
-                </h2>
-              </div>
-              <form onSubmit={handleAddBusiness} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Business Name *
-                  </label>
-                  <Input
-                    placeholder="Business Name"
-                    value={newBusiness.name}
-                    onChange={(e) =>
-                      setNewBusiness({ ...newBusiness, name: e.target.value })
-                    }
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Address *
-                  </label>
-                  <Input
-                    placeholder="Street 123, City, etc."
-                    value={newBusiness.address}
-                    onChange={(e) =>
-                      setNewBusiness({
-                        ...newBusiness,
-                        address: e.target.value,
-                      })
-                    }
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Phone Number *
-                  </label>
-                  <Input
-                    placeholder="+1234567890"
-                    value={newBusiness.phone_number}
-                    onChange={(e) =>
-                      setNewBusiness({
-                        ...newBusiness,
-                        phone_number: e.target.value,
-                      })
-                    }
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Website
-                  </label>
-                  <Input
-                    placeholder="https://example.com"
-                    value={newBusiness.website}
-                    onChange={(e) =>
-                      setNewBusiness({
-                        ...newBusiness,
-                        website: e.target.value,
-                      })
-                    }
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Category
-                  </label>
-                  <Input
-                    placeholder="e.g. Cafe, Store, etc."
-                    value={newBusiness.category}
-                    onChange={(e) =>
-                      setNewBusiness({
-                        ...newBusiness,
-                        category: e.target.value,
-                      })
-                    }
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Google Maps Link
-                  </label>
-                  <Input
-                    placeholder="https://maps.google.com/..."
-                    value={newBusiness.google_maps_link}
-                    onChange={(e) =>
-                      setNewBusiness({
-                        ...newBusiness,
-                        google_maps_link: e.target.value,
-                      })
-                    }
-                    className="mt-1"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center space-x-2"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  <span>Add Business</span>
-                </Button>
-              </form>
-            </Card>
-          )}
-
-          {/* Отображение результатов */}
-          <BusinessResults businesses={businesses} loading={loading} />
-        </div>
-      )}
+        {/* Отображение списка бизнесов или индикатора загрузки */}
+        <BusinessResults businesses={businesses} loading={loading} />
+      </div>
     </motion.div>
   );
 }
 
-// Компонент для отображения результатов или индикатора загрузки
+// Новый компонент для отображения результатов
 function BusinessResults({
   businesses,
   loading,
